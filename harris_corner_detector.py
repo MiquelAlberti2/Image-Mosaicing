@@ -4,6 +4,75 @@ import numpy as np
 from skimage.feature import peak_local_max
 
 
+def size_gaussian_mask(std):
+
+    size=5*std
+
+    # the number should be integer
+    if not size.is_integer():
+        size=int(5*std) + 1
+        
+    # we want an odd size
+    if size%2==0:
+        size+=1
+
+    size = int(size)
+
+    return size, int(size/2)
+    
+def compute_Gauss_filter(std):
+    
+    size, half_s = size_gaussian_mask(std)
+
+    mask = np.zeros((size,size))
+
+    half_s = int(size/2)
+
+    for i in range(-half_s,half_s+1):
+        for j in range(-half_s,half_s+1):
+            mask[i+half_s,j+half_s] = np.exp((-i*i - j*j)/(2*std*std))
+
+    # Factor to normalize the mask
+    k = np.sum(mask)
+
+    # to get the separable filter, we just take the first row
+    d_mask = (1/(k**(1/2)))*mask[0]
+
+    return d_mask, half_s
+
+
+def apply_Gauss_smoothing(img,std):
+
+    #create a kernel for a separated gaussian filter
+    kernel, padding_size = compute_Gauss_filter(std)
+
+    nrow=img.shape[0]
+    ncol=img.shape[1]
+
+    # create a "horizontal" 0 padding
+    padded_image = np.pad(img, ((0, 0), (padding_size, padding_size)), mode='constant')
+
+    
+    vertical_filt_img = np.zeros_like(img)
+
+    # apply the horizontal filter
+    for i in range(nrow):
+        for j in range(padding_size, ncol + padding_size):
+                vertical_filt_img[i,j-padding_size] = (kernel*padded_image[i, j-padding_size:j+padding_size+1]).sum()
+
+
+    # create a "vertical" 0 padding
+    vertical_filt_img = np.pad(vertical_filt_img, ((padding_size, padding_size), (0, 0)), mode='constant')
+    
+    filt_img = np.zeros_like(img)
+
+    # apply the vertical filter
+    for i in range(padding_size, nrow + padding_size):
+        for j in range(ncol):
+                filt_img[i-padding_size,j] = (kernel*vertical_filt_img[i-padding_size:i+padding_size+1, j]).sum()
+
+    return filt_img
+
 def apply_Kernel(img, kernel):
 
     nrow=img.shape[0]
@@ -41,13 +110,12 @@ def detect_features(img):
     I_y2 = np.square(I_y)
     I_xy = I_x * I_y
 
-    # Smooth out with a 5x5 box filter
-    box_kernel = np.zeros((5,5))
-    box_kernel.fill(1./(5*5))
+    # Smooth out with a gauss filtering
+    std = 0.7
 
-    I_x2 = apply_Kernel(I_x2, box_kernel)
-    I_y2 = apply_Kernel(I_y2, box_kernel)
-    I_xy = apply_Kernel(I_xy, box_kernel)
+    I_x2 = apply_Gauss_smoothing(I_x2, std)
+    I_y2 = apply_Gauss_smoothing(I_y2, std)
+    I_xy = apply_Gauss_smoothing(I_xy, std)
 
     # we will use a C matrix of 1 × 1 neighborhood to save computations
     # so it is just C=[[I_x2, I_xy],[I_xy, I_y2]] at the corresponding pixel value
