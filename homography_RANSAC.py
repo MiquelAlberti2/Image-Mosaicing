@@ -1,11 +1,9 @@
 
 
-def estimate_homography(corresp_dict):
+def estimate_homography(corresp):
     """
     INPUT
-     - Dictionary with
-     - - Key=tuple with pixel coord of img1
-     - - Value=tuple with pixel coord of the correspondance in img2
+     - list of pairs (tuples) of matching points
     OUTPUT
      - Matrix of the homography that maps img1 into img2
     """

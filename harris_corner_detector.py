@@ -58,10 +58,9 @@ def detect_features(img):
 
     R=det-0.05*(trace**2)
 
-    # ¿¿Threshold the harris response???
-    # when R>0 and relativelly big, we have a corner
-    threshold = 0.1 * np.max(R)
-    corners = peak_local_max(R, min_distance=5, threshold_abs=threshold, exclude_border=True)
+    # when R>0 and relativelly big (bigger than threshold), we have a corner
+    # return a list of the [x y] coordinates where there is a corner
+    thr = 0.1 * np.max(R)
+    corners = peak_local_max(R, min_distance=5, threshold_abs=thr, exclude_border=True)
     
-
     return corners

@@ -40,15 +40,21 @@ features2 = detect_features(grey_img2)
 
 # visualize the detected corners
 plt.imshow(image1, cmap='gray')
-plt.plot(features1[:, 1], features1[:, 0], 'r.', markersize=3)
+plt.plot(features1[:, 1], features1[:, 0], 'r.', markersize=5)
+plt.show()
+
+plt.imshow(image2, cmap='gray')
+plt.plot(features2[:, 1], features2[:, 0], 'r.', markersize=5)
 plt.show()
 
 ##################
 # Find correspondaces between the two sets of cornes
 ##################
 
-# get a dictionay containing all the feature correspondances
-corresp_dict = find_correspondances(grey_img1, grey_img2, features1, features2)
+# get a list containing all the feature correspondances
+corresp = find_correspondances(grey_img1, grey_img2, features1, features2)
+
+print(corresp)
 
 
 """
@@ -76,7 +82,7 @@ plt.show()
 ##################
 
 # estimate the homography matrix from the computed correspondances
-homography = estimate_homography(corresp_dict)
+homography = estimate_homography(corresp)
 
 ##################
 # Warp one image onto the other to obtain the final mosaic
