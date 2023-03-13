@@ -1,5 +1,6 @@
 import numpy as np
 import imageio.v3 as iio # to read and write images
+import matplotlib.pyplot as plt
 
 
 # Other files in the project
@@ -37,6 +38,11 @@ grey_img2 = rgb_to_gray(image2)
 features1 = detect_features(grey_img1)
 features2 = detect_features(grey_img2)
 
+# visualize the detected corners
+plt.imshow(image1, cmap='gray')
+plt.plot(features1[:, 1], features1[:, 0], 'r.', markersize=3)
+plt.show()
+
 ##################
 # Find correspondaces between the two sets of cornes
 ##################
@@ -44,6 +50,27 @@ features2 = detect_features(grey_img2)
 # get a dictionay containing all the feature correspondances
 corresp_dict = find_correspondances(grey_img1, grey_img2, features1, features2)
 
+
+"""
+DRAW THE CORRESPONDENCES BETWEEN TWO IMAGES
+
+from skimage import draw
+
+img3 = np.zeros((max(img1.shape[0], img2.shape[0]), img1.shape[1]+img2.shape[1]))
+img3[:img1.shape[0], :img1.shape[1]] = img1
+img3[:img2.shape[0], img1.shape[1]:] = img2
+
+fig, ax = plt.subplots(figsize=(10,10))
+ax.imshow(img3, cmap='gray')
+
+for match in good_matches:
+    idx1 = match[0]
+    idx2 = match[1] + img1.shape[1]
+    r, c = draw.line(kp1[idx1][0], kp1[idx1][1], kp2[idx2-img1.shape[1]][0], kp2[idx2-img1.shape[1]][1])
+    ax.plot(c, r, linewidth=0.4, color='blue')
+
+plt.show()
+"""
 ##################
 # Estimate the homography using RANSAC to ignore outliers
 ##################
@@ -59,5 +86,5 @@ homography = estimate_homography(corresp_dict)
 mosaic = warp_image1_onto_image2(image1, image2, homography)
 
 # write the mosaic to disk
-iio.imwrite(uri="output/mosaic.png", image=mosaic)
+# iio.imwrite(uri="output/mosaic.png", image=mosaic)
 
