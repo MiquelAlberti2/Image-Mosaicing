@@ -57,26 +57,27 @@ corresp = find_correspondances(grey_img1, grey_img2, features1, features2)
 print(corresp)
 
 
-"""
-DRAW THE CORRESPONDENCES BETWEEN TWO IMAGES
+
+# DRAW THE CORRESPONDENCES BETWEEN TWO IMAGES
 
 from skimage import draw
 
-img3 = np.zeros((max(img1.shape[0], img2.shape[0]), img1.shape[1]+img2.shape[1]))
-img3[:img1.shape[0], :img1.shape[1]] = img1
-img3[:img2.shape[0], img1.shape[1]:] = img2
+img3 = np.zeros((grey_img1.shape[0]+grey_img2.shape[0], max(grey_img1.shape[1], grey_img2.shape[1])))
+img3[:grey_img1.shape[0], :grey_img1.shape[1]] = grey_img1
+img3[grey_img1.shape[0]:, :grey_img2.shape[1]] = grey_img2
 
 fig, ax = plt.subplots(figsize=(10,10))
 ax.imshow(img3, cmap='gray')
 
-for match in good_matches:
-    idx1 = match[0]
-    idx2 = match[1] + img1.shape[1]
-    r, c = draw.line(kp1[idx1][0], kp1[idx1][1], kp2[idx2-img1.shape[1]][0], kp2[idx2-img1.shape[1]][1])
+for match in corresp:
+    pt1 = match[0]
+    pt2 = match[1]
+    r, c = draw.line(pt1[0], pt1[1], pt2[0] + grey_img1.shape[0], pt2[1])
     ax.plot(c, r, linewidth=0.4, color='blue')
 
 plt.show()
-"""
+
+
 ##################
 # Estimate the homography using RANSAC to ignore outliers
 ##################
