@@ -35,7 +35,7 @@ def find_correspondances(img1, img2, features1, features2):
      - list of pairs (tuples) of matching points
     """
     corresp = []
-    threshold = 0.8
+    threshold = 0.9
 
     for pt1 in features1:
         for pt2 in features2:
@@ -45,7 +45,42 @@ def find_correspondances(img1, img2, features1, features2):
             if ncc > threshold:
                 corresp.append((pt1,pt2))
 
-            # TODO, remove points when added to corresp
-            # OR if there are two matches with the same point, just save the one with the higher NCC 
+    # now we need to delete duplicate points in corresp
+    i = 0
+    removed_index_matches = set()
+    
+    while i<len(corresp):
+        if i not in removed_index_matches:
+            pt1 = corresp[i][0]
+            pt2 = corresp[i][1]
 
-    return corresp
+            ncc = compute_NCC(img1, img2, pt1, pt2)
+
+            j = i+1
+            substituted = False
+            while j<len(corresp) and not substituted:
+                if j not in removed_index_matches:
+                    compared1 = corresp[j][0]
+                    compared2 = corresp[j][1]
+
+                    if np.all(pt1 == compared1) or np.all(pt2 == compared2):
+                        # check if it is a better match
+                        if ncc < compute_NCC(img1, img2, compared1, compared2):
+                            removed_index_matches.add(i)
+                            substituted = True
+                        else:
+                            removed_index_matches.add(j)
+
+                j+=1
+        i+=1
+
+    #build the final list without adding the duplicates
+    corresp_no_duplicates = []
+    i=0
+    while i<len(corresp):
+        if i not in removed_index_matches:
+            corresp_no_duplicates.append(corresp[i])
+
+        i+=1
+
+    return corresp_no_duplicates
