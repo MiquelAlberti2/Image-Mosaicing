@@ -69,7 +69,7 @@ plt.show()
 # get a list containing all the feature correspondances
 corresp = find_correspondances(grey_img1, grey_img2, features1, features2)
 
-print("INITIAL CORRESPONDACES: ", corresp)
+print("\nINITIAL CORRESPONDACES: \n", corresp)
 # plot the correspondaces between the two images
 plot_correspondaces(grey_img1, grey_img2, corresp)
 
@@ -81,7 +81,7 @@ plot_correspondaces(grey_img1, grey_img2, corresp)
 # estimate the homography matrix from the computed correspondances
 homography, inliers = estimate_homography(corresp)
 
-print("INLIERS CORRESPONDACES: ", inliers)
+print("\nINLIERS AFTER RANSAC:\n", inliers)
 # plot the correspondaces between the two images
 plot_correspondaces(grey_img1, grey_img2, inliers)
 
