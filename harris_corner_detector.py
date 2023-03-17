@@ -128,7 +128,7 @@ def detect_features(img):
 
     # when R>0 and relativelly big (bigger than threshold), we have a corner
     # return a list of the [x y] coordinates where there is a corner
-    thr = 0.1 * np.max(R)
+    thr = 0.025 * np.max(R)
     corners = peak_local_max(R, min_distance=5, threshold_abs=thr, exclude_border=True)
     
     return corners

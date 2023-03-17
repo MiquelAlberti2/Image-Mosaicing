@@ -48,9 +48,11 @@ def estimate_homography(corresp):
     best_inliers = None
     best_score = 0
 
-    thr = 1
-    k = 10 #number of iterations 
-    for i in range(k):
+    thr = 10
+    max_iter = 100 #number of iterations 
+    iter=0
+    exit = False
+    while iter < max_iter and not exit:
         inliers = []
         # Randomly sample 4 points (minimum required to determine homography in P2)
         i_sample = np.random.choice(len(corresp), 4, replace=False)
@@ -82,6 +84,15 @@ def estimate_homography(corresp):
             best_score = score
             print("current best score: ", best_score)
 
+            if best_score > max(len(corresp)+1,4):
+                # Is good enough
+                exit=True
+
+        iter+=1
+        
+    if not exit:
+        print("maximum number of iterations reached with RANSAC!")
     # Compute the final homography with all inliers
+
     return compute_homography(best_inliers), best_inliers
 

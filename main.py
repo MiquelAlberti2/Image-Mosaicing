@@ -2,6 +2,7 @@ import numpy as np
 import imageio.v3 as iio # to read and write images
 import matplotlib.pyplot as plt
 from skimage import draw
+import cv2
 
 # Other files in the project
 from harris_corner_detector import detect_features
@@ -37,17 +38,32 @@ def plot_correspondaces(img1, img2, corresp):
 # Read the two images
 ##################
 
-image1 = iio.imread(uri='DanaHallWay1/DSC_0281.JPG')
-image2 = iio.imread(uri='DanaHallWay1/DSC_0282.JPG')
+images = []
 
-grey_img1 = rgb_to_gray(image1)
-grey_img2 = rgb_to_gray(image2)
+for i in range(8, 18):
+    num_image = str(i)
+    if i<10:
+        num_image ='0'+num_image       
 
-#TODO consider reducing the size here
+    images.append(iio.imread(uri='DanaOffice/DSC_03'+num_image+'.JPG'))
+
+# convert to grey images and reduce them by a scaling factor
+grey_images = []
+
+scale = 0.75
+for i in range(len(images)):
+    h, w = images[i].shape[0], images[i].shape[1]
+    images[i] = cv2.resize(images[i], (int(scale*w), int(scale*h)))
+    grey_images.append(rgb_to_gray(images[i]))
 
 ##################
 # Detect features of both images
 ##################
+
+grey_img1 = grey_images[0]
+grey_img2 = grey_images[1]
+image1 = images[0]
+image2 = images[1]
 
 # get masks with corner locations
 features1 = detect_features(grey_img1)
@@ -69,7 +85,7 @@ plt.show()
 # get a list containing all the feature correspondances
 corresp = find_correspondances(grey_img1, grey_img2, features1, features2)
 
-print("\nINITIAL CORRESPONDACES: \n", corresp)
+print("\nNumber of initial correspondances: ", len(corresp))
 # plot the correspondaces between the two images
 plot_correspondaces(grey_img1, grey_img2, corresp)
 
@@ -81,7 +97,7 @@ plot_correspondaces(grey_img1, grey_img2, corresp)
 # estimate the homography matrix from the computed correspondances
 homography, inliers = estimate_homography(corresp)
 
-print("\nINLIERS AFTER RANSAC:\n", inliers)
+print("\nNumber of inliers after RANSAC: ", len(inliers))
 # plot the correspondaces between the two images
 plot_correspondaces(grey_img1, grey_img2, inliers)
 
@@ -93,6 +109,10 @@ plot_correspondaces(grey_img1, grey_img2, inliers)
 # obtain the final mosaic with the computed homography
 mosaic = warp_image1_onto_image2(image1, image2, homography)
 
+# Display the output mosaic
+plt.imshow(mosaic)
+plt.show()
+
 # write the mosaic to disk
-# iio.imwrite(uri="output/mosaic.png", image=mosaic)
+iio.imwrite(uri="output/mosaic.png", image=mosaic)
 
