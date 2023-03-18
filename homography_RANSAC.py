@@ -48,7 +48,7 @@ def estimate_homography(corresp):
     best_inliers = None
     best_score = 0
 
-    thr = 7.5
+    thr = 5
     max_iter = 1000 #number of iterations 
     iter=0
     exit = False

@@ -97,10 +97,6 @@ def detect_features(img):
      - mask of the same size as the img with 1s at the corners locations
     """
 
-    # apply a smoothing filter, because derivatives are very sensitive to noise
-    std = 0.5
-    img = apply_Gauss_smoothing(img, std)
-
     # create kernel for Sobel mask
     kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
@@ -114,12 +110,11 @@ def detect_features(img):
     I_y2 = np.square(I_y)
     I_xy = I_x * I_y
 
-    """# Smooth out with a gauss filtering
-    std = 0.7
-
+    # apply a smoothing filter, because derivatives are very sensitive to noise
+    std=0.7
     I_x2 = apply_Gauss_smoothing(I_x2, std)
     I_y2 = apply_Gauss_smoothing(I_y2, std)
-    I_xy = apply_Gauss_smoothing(I_xy, std)"""
+    I_xy = apply_Gauss_smoothing(I_xy, std)
 
     R = np.zeros_like(img)
 
@@ -138,7 +133,7 @@ def detect_features(img):
 
     # when R>0 and relativelly big (bigger than threshold), we have a corner
     # return a list of the [x y] coordinates where there is a corner
-    thr = 0.025 * np.max(R)
+    thr = np.mean(R) + np.std(R)
     corners = peak_local_max(R, min_distance=5, threshold_abs=thr, exclude_border=True)
     
     return corners
