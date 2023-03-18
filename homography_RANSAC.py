@@ -9,7 +9,7 @@ def compute_homography(corresp):
     """
     n=len(corresp)
 
-    # build the system of equations Ah=b
+    # build the system of equations Ah=0
     A = np.empty((2*n, 9))
 
     for i in range(n):
@@ -43,13 +43,14 @@ def estimate_homography(corresp):
     INPUT
      - list of pairs (tuples) of matching points
     OUTPUT
-     - Matrix of the homography that maps img1 into img2
+     - Matrix of the homography that maps the first points in corresp
+                                     into the second points in corresp
     """
     best_inliers = None
     best_score = 0
 
     thr = 5
-    max_iter = 100 #number of iterations 
+    max_iter = 100 # number of iterations 
     iter=0
     exit = False
     while iter < max_iter and not exit:
@@ -92,7 +93,7 @@ def estimate_homography(corresp):
         
     if not exit:
         print("maximum number of iterations reached with RANSAC!")
+        
     # Compute the final homography with all inliers
-
     return compute_homography(best_inliers), best_inliers
 

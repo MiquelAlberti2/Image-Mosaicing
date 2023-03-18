@@ -30,7 +30,7 @@ def find_correspondances(img1, img2, features1, features2):
     """
     INPUT
      - img1, img2: numpy array representing grey images
-     - features1, features2: lists of coordinates where there is a corner
+     - features1, features2: lists of coordinates where there is a feature
     OUTPUT
      - list of pairs (tuples) of matching points
     """

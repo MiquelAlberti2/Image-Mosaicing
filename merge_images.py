@@ -17,16 +17,16 @@ def warp_images(img1, img2, img3, homography1, homography3):
      - homography1: that maps img1 into img2
      - homography3: that maps img3 into img2
     OUTPUT
-     - final mosaic with img1 warped into img2
+     - final mosaic with img1 and img3 warped into img2
     """
 
-    # create output image with the appropiate size to fit both original images
+    # create output image with the appropiate size to fit all original images
     n1, c1 = img1.shape[0], img1.shape[1]
     n2, c2 = img2.shape[0], img2.shape[1]
     n3, c3 = img3.shape[0], img3.shape[1]
 
     # get the images of the corners to see how big the output should be
-    # we warp image 1 into image 2, so we just need the images of image 1
+    # we use the coordinate system of img2, so we don't need to transform its coordinates
     img1_corner1 = compute_image(homography1, [0,0])
     img1_corner2 = compute_image(homography1, [0,c1])
     img1_corner3 = compute_image(homography1, [n1,c1])
@@ -52,30 +52,25 @@ def warp_images(img1, img2, img3, homography1, homography3):
 
     mosaic = np.zeros((max_row - min_row, max_col - min_col, 3), dtype='uint8')
 
-    # copy image 2 into the solution
+    # copy img2 into the solution
     mosaic[-min_row:n2-min_row, -min_col:c2-min_col,:] = img2 # min_row and min_col could be negative
-
-    # Display the output mosaic
-    plt.imshow(mosaic)
-    plt.show()
 
     # warp image 1 using the inverse of the homography (backward warping)
     h_inverse1 = np.linalg.inv(homography1)
     h_inverse3 = np.linalg.inv(homography3)
 
-    # Interpolate the pixel values of each input image at the transformed coordinates of the meshgrid
-    interpR1 = interp2d(np.arange(c1), np.arange(n1), img1[:, :, 0], kind='linear') # it first takes the y component
+    # Interpolate the pixel values of img1 and img3
+    interpR1 = interp2d(np.arange(c1), np.arange(n1), img1[:, :, 0], kind='linear')
     interpG1 = interp2d(np.arange(c1), np.arange(n1), img1[:, :, 1], kind='linear')
     interpB1 = interp2d(np.arange(c1), np.arange(n1), img1[:, :, 2], kind='linear')
 
-    interpR3 = interp2d(np.arange(c3), np.arange(n3), img3[:, :, 0], kind='linear') # it first takes the y component
+    interpR3 = interp2d(np.arange(c3), np.arange(n3), img3[:, :, 0], kind='linear')
     interpG3 = interp2d(np.arange(c3), np.arange(n3), img3[:, :, 1], kind='linear')
     interpB3 = interp2d(np.arange(c3), np.arange(n3), img3[:, :, 2], kind='linear')
 
     for i in range(mosaic.shape[0]):
         for j in range(mosaic.shape[1]):
-            # Let's continue with the assumption that the camera is rotating along the Y_axis
-            # So we can distinguish the following cases:
+            # express the point in the coordinate system of img1 and img3
             coord_img1_y, coord_img1_x = compute_image(h_inverse1,[i+min_row, j+min_col])
             coord_img3_y, coord_img3_x = compute_image(h_inverse3,[i+min_row, j+min_col])
 
@@ -83,9 +78,9 @@ def warp_images(img1, img2, img3, homography1, homography3):
             in_img1, in_img2, in_img3 = 0,0,0
             # if it's outside the frame, no blending
             if coord_img1_x > 0 and coord_img1_x < c1 and coord_img1_y > 0 and coord_img1_y < n1:
-                in_img1=0.3
+                in_img1=0.3 # if its inside the frame, we have to consider its color in the final mosaic
 
-                # make sure that the values are between 0 and 255
+                # to make sure that the values are between 0 and 255
                 img1_R = max(0, min(interpR1(coord_img1_x, coord_img1_y), 255)) 
                 img1_G = max(0, min(interpG1(coord_img1_x, coord_img1_y), 255))
                 img1_B = max(0, min(interpB1(coord_img1_x, coord_img1_y), 255))
@@ -93,7 +88,7 @@ def warp_images(img1, img2, img3, homography1, homography3):
             if coord_img3_x > 0 and coord_img3_x < c3 and coord_img3_y > 0 and coord_img3_y < n3:
                 in_img3=0.3
 
-                # make sure that the values are between 0 and 255
+                # to make sure that the values are between 0 and 255
                 img3_R = max(0, min(interpR3(coord_img3_x, coord_img3_y), 255)) 
                 img3_G = max(0, min(interpG3(coord_img3_x, coord_img3_y), 255))
                 img3_B = max(0, min(interpB3(coord_img3_x, coord_img3_y), 255))

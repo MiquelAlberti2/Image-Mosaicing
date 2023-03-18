@@ -25,8 +25,12 @@ def rgb_to_gray(rgb):
 images = [iio.imread(uri='DanaOffice/DSC_0308.JPG'),
           iio.imread(uri='DanaOffice/DSC_0309.JPG'),
           iio.imread(uri='DanaOffice/DSC_0310.JPG')]
+    
+# images = [iio.imread(uri='DanaHallWay1/DSC_0281.JPG'),
+#           iio.imread(uri='DanaHallWay1/DSC_0282.JPG'),
+#           iio.imread(uri='DanaHallWay1/DSC_0283.JPG')]
 
-# convert to grey images and reduce them by a scaling factor
+# convert to grey images and reduce them by a scaling factor (to reduce runtime)
 grey_images = []
 scale = 0.65
 
