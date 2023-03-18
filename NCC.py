@@ -3,7 +3,7 @@ import numpy as np
 
 def compute_NCC(img1, img2, pt1, pt2):
     # compute NCC of a neighbourhood around pt1 and pt2 of size 2n+1
-    n = 1
+    n = 3
 
     x1, y1 = pt1[0], pt1[1]
     x2, y2 = pt2[0], pt2[1]

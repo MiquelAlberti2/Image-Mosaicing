@@ -49,7 +49,7 @@ def estimate_homography(corresp):
     best_score = 0
 
     thr = 5
-    max_iter = 1000 #number of iterations 
+    max_iter = 100 #number of iterations 
     iter=0
     exit = False
     while iter < max_iter and not exit:
@@ -84,7 +84,7 @@ def estimate_homography(corresp):
             best_score = score
             print("current best score: ", best_score)
 
-            if best_score > max((len(corresp)/2),4):
+            if best_score > max((4*len(corresp)/5),4):
                 # Is good enough
                 exit=True
 
