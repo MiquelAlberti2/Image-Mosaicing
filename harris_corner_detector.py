@@ -3,7 +3,6 @@ import numpy as np
 # Non-maximum suppression
 from skimage.feature import peak_local_max
 
-
 def size_gaussian_mask(std):
 
     size=5*std
@@ -97,6 +96,11 @@ def detect_features(img):
     OUTPUT
      - mask of the same size as the img with 1s at the corners locations
     """
+
+    # apply a smoothing filter, because derivatives are very sensitive to noise
+    std = 0.5
+    img = apply_Gauss_smoothing(img, std)
+
     # create kernel for Sobel mask
     kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
@@ -110,21 +114,27 @@ def detect_features(img):
     I_y2 = np.square(I_y)
     I_xy = I_x * I_y
 
-    # Smooth out with a gauss filtering
+    """# Smooth out with a gauss filtering
     std = 0.7
 
     I_x2 = apply_Gauss_smoothing(I_x2, std)
     I_y2 = apply_Gauss_smoothing(I_y2, std)
-    I_xy = apply_Gauss_smoothing(I_xy, std)
+    I_xy = apply_Gauss_smoothing(I_xy, std)"""
 
-    # we will use a C matrix of 1 × 1 neighborhood to save computations
-    # so it is just C=[[I_x2, I_xy],[I_xy, I_y2]] at the corresponding pixel value
+    R = np.zeros_like(img)
 
-    # compute the score R instead of the eigenvalues
-    det=(I_x2*I_y2)-(I_xy*I_xy)
-    trace=I_x2+I_y2
+    # we compute the C matrix using a neighborhood of 7x7 (ignoring borders)
+    for i in range(3, img.shape[0]-3):
+        for j in range(3, img.shape[1]-3):
+            I_x2_sum=I_x2[i-3:i+4, j-3:j+4].sum()
+            I_y2_sum=I_y2[i-3:i+4, j-3:j+4].sum()
+            I_xy_sum=I_xy[i-3:i+4, j-3:j+4].sum()
 
-    R=det-0.05*(trace**2)
+            # compute the score R instead of the eigenvalues
+            det=(I_x2_sum*I_y2_sum)-(I_xy_sum*I_xy_sum)
+            trace=I_x2_sum+I_y2_sum
+
+            R[i,j]=det-0.05*(trace**2)
 
     # when R>0 and relativelly big (bigger than threshold), we have a corner
     # return a list of the [x y] coordinates where there is a corner

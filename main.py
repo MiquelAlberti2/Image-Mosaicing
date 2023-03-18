@@ -27,7 +27,6 @@ images = [iio.imread(uri='DanaOffice/DSC_0308.JPG'),
           iio.imread(uri='DanaOffice/DSC_0310.JPG')]
 
 # convert to grey images and reduce them by a scaling factor
-images.reverse()
 grey_images = []
 scale = 0.65
 
@@ -35,6 +34,7 @@ for i in range(len(images)):
     h, w = images[i].shape[0], images[i].shape[1]
     images[i] = cv2.resize(images[i], (int(scale*w), int(scale*h)))
     grey_images.append(rgb_to_gray(images[i]))
+
 
 ##################
 # Detect features of each image
